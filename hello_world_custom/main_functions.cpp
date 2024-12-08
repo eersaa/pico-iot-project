@@ -15,6 +15,7 @@ limitations under the License.
 
 #include "constants.h"
 #include "hello_world_float_model_data.h"
+#include "hello_world_int8_model_data.h"
 #include "main_functions.h"
 #include "output_handler.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
@@ -22,6 +23,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/system_setup.h"
 #include "tensorflow/lite/schema/schema_generated.h"
+#include "pico/time.h"
 
 // Globals, used for compatibility with Arduino-style sketches.
 namespace {
@@ -41,7 +43,7 @@ void setup() {
 
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
-  model = tflite::GetModel(g_hello_world_float_model_data);
+  model = tflite::GetModel(g_hello_world_int8_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     MicroPrintf(
         "Model provided is schema version %d not equal "
@@ -89,10 +91,13 @@ void loop() {
                    static_cast<float>(kInferencesPerCycle);
   float x = position * kXrange;
 
+  MicroPrintf("input pointer: %p\n", input);
   // Quantize the input from floating-point to integer
   int8_t x_quantized = x / input->params.scale + input->params.zero_point;
   // Place the quantized input in the model's input tensor
   input->data.int8[0] = x_quantized;
+  MicroPrintf("Quantized: %d, float x: %.4f, scale: %.4f, zero point: %d\n", 
+              x_quantized, x, input->params.scale, input->params.zero_point);
 
   // Run inference, and report any error
   TfLiteStatus invoke_status = interpreter->Invoke();
@@ -108,7 +113,8 @@ void loop() {
 
   // Output the results. A custom HandleOutput function can be implemented
   // for each supported hardware target.
-  HandleOutput(x, y);
+  // HandleOutput(x, y);
+  sleep_ms(10);
 
   // Increment the inference_counter, and reset it if we have reached
   // the total number per cycle

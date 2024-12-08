@@ -74,7 +74,7 @@ void HandleOutput(float x_value, float y_value) {
   g_led_brightness = (int)(127.5f * (y_value + 1));
 
   // Log the current brightness value for display in the console.
-  MicroPrintf("%d\n", g_led_brightness);
+  MicroPrintf("Led: %d, x-value: %.4f, y-value: %.4f\n", g_led_brightness, x_value, y_value);
    
   // By default the sine wave is too fast to see in the LED, so slow
   // down the whole program deliberately so it's more visible.
