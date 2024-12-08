@@ -78,4 +78,4 @@ target_link_libraries(pico-iot-project
 
 pico_add_extra_outputs(pico-iot-project)
 
-add_subdirectory(hello_world)
+add_subdirectory(hello_world_custom)
