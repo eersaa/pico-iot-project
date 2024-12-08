@@ -28,6 +28,17 @@ set(PICO_BOARD pico_w CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
+include(FetchContent)
+
+# Fetch pico-tflmicro library at a specific commit
+FetchContent_Declare(
+  pico-tflmicro
+  GIT_REPOSITORY https://github.com/raspberrypi/pico-tflmicro.git
+  GIT_TAG 03cbb1e  # Replace <commit-hash> with the specific commit you want to use
+)
+
+FetchContent_MakeAvailable(pico-tflmicro)
+
 project(pico-iot-project C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
@@ -62,7 +73,9 @@ target_link_libraries(pico-iot-project
         hardware_dma
         hardware_pio
         pico_cyw43_arch_none
+        pico-tflmicro
         )
 
 pico_add_extra_outputs(pico-iot-project)
 
+add_subdirectory(hello_world)
