@@ -85,7 +85,7 @@ endif ()
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
-set(PICO_BOARD pico_w CACHE STRING "Board type")
+set(PICO_BOARD pico_w CACHE STRING "Board type" FORCE)
 
 pico_sdk_init()
 
