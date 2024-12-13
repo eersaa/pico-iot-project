@@ -69,6 +69,7 @@
 /* Library includes. */
 #include <stdio.h>
 #include "hardware/gpio.h"
+#include "pico/cyw43_arch.h"
 
 /* Priorities at which the tasks are created. */
 #define mainQUEUE_RECEIVE_TASK_PRIORITY		( tskIDLE_PRIORITY + 2 )
@@ -84,7 +85,7 @@ the queue empty. */
 #define mainQUEUE_LENGTH					( 1 )
 
 /* The LED toggled by the Rx task. */
-#define mainTASK_LED						( PICO_DEFAULT_LED_PIN )
+#define mainTASK_LED						( CYW43_WL_GPIO_LED_PIN )
 
 /*-----------------------------------------------------------*/
 
@@ -187,6 +188,7 @@ const unsigned long ulExpectedValue = 100UL;
 		{
 			gpio_xor_mask( 1u << mainTASK_LED );
 			ulReceivedValue = 0U;
+			printf(" Setting led\n"); // debug
 		}
 	}
 }

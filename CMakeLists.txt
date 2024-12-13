@@ -1,3 +1,14 @@
+# Generated Cmake Pico project file
+
+cmake_minimum_required(VERSION 3.13)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Initialise pico_sdk from installed location
+# (note this can come from environment, CMake cache etc)
+
 # == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
 if(WIN32)
     set(USERHOME $ENV{USERPROFILE})
@@ -12,15 +23,15 @@ if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
 # ====================================================================================
-cmake_minimum_required(VERSION 3.13)
 
 # Pull in SDK (must be before project)
 # set(PICO_SDK_FETCH_FROM_GIT on)
 include(pico_sdk_import.cmake)
 
-include(FetchContent)
-
 project(pico-iot-project C CXX ASM)
+
+
+include(FetchContent)
 
 # Pull in FreeRTOS-kernel port for pi pico
 FetchContent_Declare(
@@ -81,10 +92,6 @@ endif ()
 
 
 # include(rpi-FreeRTOS-kernel.cmake)
-
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
-
 set(PICO_BOARD pico_w CACHE STRING "Board type" FORCE)
 
 pico_sdk_init()
@@ -150,7 +157,17 @@ target_include_directories(main_blinky PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
         ${FREERTOS_DEMO_PATH}/Common/include)
 
-target_link_libraries(main_blinky pico_stdlib FreeRTOS-Kernel FreeRTOS-Kernel-Heap1)
+target_link_libraries(main_blinky 
+                        pico_stdlib
+                        FreeRTOS-Kernel 
+                        FreeRTOS-Kernel-Heap1
+                        pico_cyw43_arch_none
+)
+
+# Modify the below lines to enable/disable output over UART/USB
+pico_enable_stdio_uart(main_blinky 1)
+pico_enable_stdio_usb(main_blinky 1)
+
 pico_add_extra_outputs(main_blinky)
 
 
@@ -165,7 +182,7 @@ pico_set_program_version(pico-iot-project "0.1")
 pico_generate_pio_header(pico-iot-project ${CMAKE_CURRENT_LIST_DIR}/blink.pio)
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(pico-iot-project 0)
+pico_enable_stdio_uart(pico-iot-project 1)
 pico_enable_stdio_usb(pico-iot-project 1)
 
 # Add the standard library to the build
@@ -184,3 +201,5 @@ target_link_libraries(pico-iot-project
         hardware_pio
         pico_cyw43_arch_none
         )
+
+pico_add_extra_outputs(pico-iot-project)

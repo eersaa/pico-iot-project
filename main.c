@@ -56,6 +56,7 @@
 #include "main.h"
 
 /* Library includes. */
+#include "pico/cyw43_arch.h"
 #include <stdio.h>
 #include "pico/stdlib.h"
 #if ( mainRUN_ON_CORE == 1 )
@@ -138,9 +139,11 @@ int main( void )
 static void prvSetupHardware( void )
 {
     stdio_init_all();
-    gpio_init(PICO_DEFAULT_LED_PIN);
-    gpio_set_dir(PICO_DEFAULT_LED_PIN, 1);
-    gpio_put(PICO_DEFAULT_LED_PIN, !PICO_DEFAULT_LED_PIN_INVERTED);
+    cyw43_arch_init();
+    // gpio_init(CYW43_WL_GPIO_LED_PIN);
+    // gpio_set_dir(CYW43_WL_GPIO_LED_PIN, 1);
+    // gpio_put(CYW43_WL_GPIO_LED_PIN, !CYW43_WL_GPIO_LED_PIN);
+    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
 }
 /*-----------------------------------------------------------*/
 
