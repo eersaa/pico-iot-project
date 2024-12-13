@@ -56,12 +56,12 @@
 #include "main.h"
 
 /* Library includes. */
-#include "pico/cyw43_arch.h"
 #include <stdio.h>
 #include "pico/stdlib.h"
 #if ( mainRUN_ON_CORE == 1 )
 #include "pico/multicore.h"
 #endif
+#include "pico/cyw43_arch.h"
 
 /* Set mainCREATE_SIMPLE_BLINKY_DEMO_ONLY to one to run the simple blinky demo,
 or 0 to run the more comprehensive test and demo application. */
@@ -140,9 +140,6 @@ static void prvSetupHardware( void )
 {
     stdio_init_all();
     cyw43_arch_init();
-    // gpio_init(CYW43_WL_GPIO_LED_PIN);
-    // gpio_set_dir(CYW43_WL_GPIO_LED_PIN, 1);
-    // gpio_put(CYW43_WL_GPIO_LED_PIN, !CYW43_WL_GPIO_LED_PIN);
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
 }
 /*-----------------------------------------------------------*/
