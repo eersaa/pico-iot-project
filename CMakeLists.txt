@@ -38,7 +38,6 @@ FetchContent_Declare(
   FreeRTOS-Kernel
   GIT_REPOSITORY https://github.com/raspberrypi/FreeRTOS-Kernel.git
   GIT_TAG 4f7299d
-#   SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS/Source
 )
 
 add_library(freertos_config INTERFACE)
@@ -69,7 +68,6 @@ FetchContent_Declare(
   FreeRTOS
   GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS.git
   GIT_TAG e62f739
-  #   SOURCE_DIR ${CMAKE_BINARY_DIR}/FreeRTOS
   )
   
   FetchContent_MakeAvailable(FreeRTOS)
@@ -91,7 +89,6 @@ if (NOT FREERTOS_DEMO_PATH)
 endif ()
 
 
-# include(rpi-FreeRTOS-kernel.cmake)
 set(PICO_BOARD pico_w CACHE STRING "Board type" FORCE)
 
 pico_sdk_init()
