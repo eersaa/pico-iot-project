@@ -137,11 +137,17 @@ target_compile_options( main_full PUBLIC
 
         $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wall>
         $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wextra>
-        $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Werror>
-        $<$<COMPILE_LANG_AND_ID:C,Clang>:-Weverything>
+        # $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Werror>
+        # $<$<COMPILE_LANG_AND_ID:C,Clang>:-Weverything>
         )
 
-target_link_libraries(main_full pico_stdlib FreeRTOS-Kernel FreeRTOS-Kernel-Heap4)
+target_link_libraries(main_full
+                        pico_stdlib 
+                        FreeRTOS-Kernel 
+                        FreeRTOS-Kernel-Heap4
+                        pico_cyw43_arch_none
+)
+
 pico_add_extra_outputs(main_full)
 
 add_executable(main_blinky

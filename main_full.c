@@ -75,6 +75,7 @@
 
 /* SDK includes */
 #include "pico/stdlib.h"
+#include "pico/cyw43_arch.h"
 
 /* Standard demo application includes. */
 #include "flop.h"
@@ -112,7 +113,7 @@
 #define mainUART_COMMAND_CONSOLE_TASK_PRIORITY	( configMAX_PRIORITIES - 2 )
 
 /* The LED used by the check task. */
-#define mainCHECK_LED						( PICO_DEFAULT_LED_PIN )
+#define mainCHECK_LED						( CYW43_WL_GPIO_LED_PIN )
 
 /* A block time of zero simply means "don't block". */
 #define mainDONT_BLOCK						( 0UL )
@@ -418,7 +419,8 @@ unsigned long ulIterations = 0;
 		/* Toggle the check LED to give an indication of the system status.  If
 		the LED toggles every mainNO_ERROR_CHECK_TASK_PERIOD milliseconds then
 		everything is ok.  A faster toggle indicates an error. */
-		gpio_xor_mask( 1u << mainCHECK_LED );
+		// gpio_xor_mask( 1u << mainCHECK_LED );
+		cyw43_arch_gpio_put(mainCHECK_LED, !cyw43_arch_gpio_get(mainCHECK_LED));
 
 		ulIterations++;
 		if( ulErrorFound != pdFALSE )
