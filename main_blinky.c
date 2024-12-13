@@ -186,9 +186,7 @@ const unsigned long ulExpectedValue = 100UL;
 		is it the expected value?  If it is, toggle the LED. */
 		if( ulReceivedValue == ulExpectedValue )
 		{
-			gpio_xor_mask( 1u << mainTASK_LED );
-			ulReceivedValue = 0U;
-			printf(" Setting led\n"); // debug
+			cyw43_arch_gpio_put(mainTASK_LED, !cyw43_arch_gpio_get(mainTASK_LED));
 		}
 	}
 }
