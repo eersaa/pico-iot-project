@@ -127,23 +127,16 @@ target_compile_definitions(main_full PRIVATE
         PICO_STDIO_STACK_BUFFER_SIZE=64 # use a small printf on stack buffer
 )
 
-target_compile_options( main_full PUBLIC
-        ### Gnu/Clang C Options
-        $<$<COMPILE_LANG_AND_ID:C,GNU>:-fdiagnostics-color=always>
-        $<$<COMPILE_LANG_AND_ID:C,Clang>:-fcolor-diagnostics>
-
-        $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wall>
-        $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Wextra>
-        # $<$<COMPILE_LANG_AND_ID:C,Clang,GNU>:-Werror>
-        # $<$<COMPILE_LANG_AND_ID:C,Clang>:-Weverything>
-        )
-
 target_link_libraries(main_full
                         pico_stdlib 
                         FreeRTOS-Kernel 
                         FreeRTOS-Kernel-Heap4
                         pico_cyw43_arch_none
 )
+
+# Modify the below lines to enable/disable output over UART/USB
+pico_enable_stdio_uart(main_full 1)
+pico_enable_stdio_usb(main_full 1)
 
 pico_add_extra_outputs(main_full)
 
