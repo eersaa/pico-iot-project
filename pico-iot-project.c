@@ -1,103 +1,135 @@
-#include <stdio.h>
+#include "FreeRTOS.h"
+#include "task.h"
+
 #include "pico/stdlib.h"
-#include "hardware/i2c.h"
-#include "hardware/dma.h"
-#include "hardware/pio.h"
 #include "pico/cyw43_arch.h"
 
-// I2C defines
-// This example will use I2C0 on GPIO8 (SDA) and GPIO9 (SCL) running at 400KHz.
-// Pins can be changed, see the GPIO function select table in the datasheet for information on GPIO assignments
-#define I2C_PORT i2c0
-#define I2C_SDA 8
-#define I2C_SCL 9
+#define MAIN_LED_DELAY 800
 
-// Data will be copied from src to dst
-const char src[] = "Hello, world! (from DMA)";
-char dst[count_of(src)];
+static void led_task(void *pvParameters);
+static void start_tasks();
 
-#include "blink.pio.h"
+static void prvSetupHardware( void );
 
-void blink_pin_forever(PIO pio, uint sm, uint offset, uint pin, uint freq) {
-    blink_program_init(pio, sm, offset, pin);
-    pio_sm_set_enabled(pio, sm, true);
+/* Prototypes for the standard FreeRTOS callback/hook functions implemented
+within this file. */
+void vApplicationMallocFailedHook( void );
+void vApplicationIdleHook( void );
+void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName );
+void vApplicationTickHook( void );
 
-    printf("Blinking pin %d at %d Hz\n", pin, freq);
+/*-----------------------------------------------------------*/
 
-    // PIO counter program takes 3 more cycles in total than we pass as
-    // input (wait for n + 1; mov; jmp)
-    pio->txf[sm] = (125000000 / (2 * freq)) - 3;
+void vLaunch( void)
+{
+    
+    start_tasks();
 }
 
-
-
-
-int main()
+int main( void )
 {
-    stdio_init_all();
+    /* Configure the hardware ready to run the demo. */
+    prvSetupHardware();
+    const char *rtos_name;
+    rtos_name = "FreeRTOS";
+    printf("%s on core 0:\n", rtos_name);
+    vLaunch();
 
-    // Initialise the Wi-Fi chip
-    if (cyw43_arch_init()) {
-        printf("Wi-Fi init failed\n");
-        return -1;
-    }
+    return 0;
+}
 
-    // I2C Initialisation. Using it at 400Khz.
-    i2c_init(I2C_PORT, 400*1000);
-    
-    gpio_set_function(I2C_SDA, GPIO_FUNC_I2C);
-    gpio_set_function(I2C_SCL, GPIO_FUNC_I2C);
-    gpio_pull_up(I2C_SDA);
-    gpio_pull_up(I2C_SCL);
-    // For more examples of I2C use see https://github.com/raspberrypi/pico-examples/tree/master/i2c
-
-    // Get a free channel, panic() if there are none
-    int chan = dma_claim_unused_channel(true);
-    
-    // 8 bit transfers. Both read and write address increment after each
-    // transfer (each pointing to a location in src or dst respectively).
-    // No DREQ is selected, so the DMA transfers as fast as it can.
-    
-    dma_channel_config c = dma_channel_get_default_config(chan);
-    channel_config_set_transfer_data_size(&c, DMA_SIZE_8);
-    channel_config_set_read_increment(&c, true);
-    channel_config_set_write_increment(&c, true);
-    
-    dma_channel_configure(
-        chan,          // Channel to be configured
-        &c,            // The configuration we just created
-        dst,           // The initial write address
-        src,           // The initial read address
-        count_of(src), // Number of transfers; in this case each is 1 byte.
-        true           // Start immediately.
+void start_tasks() {
+    // Create Your Task
+    xTaskCreate(
+        led_task,    // Task to be run
+        "LED_TASK",  // Name of the Task for debugging and managing its Task Handle
+        1024,        // Stack depth to be allocated for use with task's stack (see docs)
+        NULL,        // Arguments needed by the Task (NULL because we don't have any)
+        1,           // Task Priority - Higher the number the more priority [max is (configMAX_PRIORITIES - 1) provided in FreeRTOSConfig.h]
+        NULL         // Task Handle if available for managing the task
     );
-    
-    // We could choose to go and do something else whilst the DMA is doing its
-    // thing. In this case the processor has nothing else to do, so we just
-    // wait for the DMA to finish.
-    dma_channel_wait_for_finish_blocking(chan);
-    
-    // The DMA has now copied our text from the transmit buffer (src) to the
-    // receive buffer (dst), so we can print it out from there.
-    puts(dst);
 
-    // PIO Blinking example
-    PIO pio = pio0;
-    uint offset = pio_add_program(pio, &blink_program);
-    printf("Loaded program at %d\n", offset);
-    
-    #ifdef PICO_DEFAULT_LED_PIN
-    blink_pin_forever(pio, 0, offset, PICO_DEFAULT_LED_PIN, 3);
-    #else
-    blink_pin_forever(pio, 0, offset, 6, 3);
-    #endif
-    // For more pio examples see https://github.com/raspberrypi/pico-examples/tree/master/pio
-
-    // Example to turn on the Pico W LED
-    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
+    // Should start you scheduled Tasks (such as the LED_Task above)
+    vTaskStartScheduler();
 
     while (true) {
-        printf("Hello, world!\n");
-        sleep_ms(1000);
+        // Your program should never get here
+    };
+}
+
+void led_task(void *pvParameters) {
+    // bool is_connected = true;
+    // if (cyw43_arch_init()) {
+    //     printf("WiFi init failed\n");
+    //     is_connected = false;
+    // }
+
+    while (true) {
+        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
+        printf("LED tuned ON!\n");
+        vTaskDelay(MAIN_LED_DELAY);  // Delay by TICKS defined by FreeRTOS priorities
+        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
+        printf("LED turned OFF\n");
+        vTaskDelay(MAIN_LED_DELAY);
     }
+}
+
+/*-----------------------------------------------------------*/
+
+static void prvSetupHardware( void )
+{
+    stdio_init_all();
+    cyw43_arch_init();
+    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
+}
+/*-----------------------------------------------------------*/
+
+void vApplicationMallocFailedHook( void )
+{
+    /* Called if a call to pvPortMalloc() fails because there is insufficient
+    free memory available in the FreeRTOS heap.  pvPortMalloc() is called
+    internally by FreeRTOS API functions that create tasks, queues, software
+    timers, and semaphores.  The size of the FreeRTOS heap is set by the
+    configTOTAL_HEAP_SIZE configuration constant in FreeRTOSConfig.h. */
+
+    /* Force an assert. */
+    configASSERT( ( volatile void * ) NULL );
+}
+/*-----------------------------------------------------------*/
+
+void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
+{
+    ( void ) pcTaskName;
+    ( void ) pxTask;
+
+    /* Run time stack overflow checking is performed if
+    configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
+    function is called if a stack overflow is detected. */
+
+    /* Force an assert. */
+    configASSERT( ( volatile void * ) NULL );
+}
+/*-----------------------------------------------------------*/
+
+void vApplicationIdleHook( void )
+{
+    volatile size_t xFreeHeapSpace;
+
+    /* This is just a trivial example of an idle hook.  It is called on each
+    cycle of the idle task.  It must *NOT* attempt to block.  In this case the
+    idle task just queries the amount of FreeRTOS heap that remains.  See the
+    memory management section on the http://www.FreeRTOS.org web site for memory
+    management options.  If there is a lot of heap memory free then the
+    configTOTAL_HEAP_SIZE value in FreeRTOSConfig.h can be reduced to free up
+    RAM. */
+    xFreeHeapSpace = xPortGetFreeHeapSize();
+
+    /* Remove compiler warning about xFreeHeapSpace being set but never used. */
+    ( void ) xFreeHeapSpace;
+}
+/*-----------------------------------------------------------*/
+
+void vApplicationTickHook( void )
+{
+    ;
 }

@@ -169,13 +169,15 @@ pico_add_extra_outputs(main_blinky)
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(pico-iot-project pico-iot-project.c )
+add_executable(pico-iot-project 
+        pico-iot-project.c
+        )
 
 pico_set_program_name(pico-iot-project "pico-iot-project")
 pico_set_program_version(pico-iot-project "0.1")
 
 # Generate PIO header
-pico_generate_pio_header(pico-iot-project ${CMAKE_CURRENT_LIST_DIR}/blink.pio)
+# pico_generate_pio_header(pico-iot-project ${CMAKE_CURRENT_LIST_DIR}/blink.pio)
 
 # Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(pico-iot-project 1)
@@ -192,10 +194,11 @@ target_include_directories(pico-iot-project PRIVATE
 
 # Add any user requested libraries
 target_link_libraries(pico-iot-project 
-        hardware_i2c
-        hardware_dma
-        hardware_pio
+        pico_stdlib
+        FreeRTOS-Kernel 
+        FreeRTOS-Kernel-Heap1
         pico_cyw43_arch_none
+        freertos_config
         )
 
 pico_add_extra_outputs(pico-iot-project)
