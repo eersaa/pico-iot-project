@@ -196,7 +196,7 @@ target_include_directories(pico-iot-project PRIVATE
 target_link_libraries(pico-iot-project 
         pico_stdlib
         FreeRTOS-Kernel 
-        FreeRTOS-Kernel-Heap1
+        FreeRTOS-Kernel-Heap4
         pico_cyw43_arch_none
         freertos_config
         )
